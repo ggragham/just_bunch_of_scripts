@@ -26,6 +26,5 @@ for SELECTED_SETTING_NAMESPACE in "${SETTING_NAMESPACE[@]}"; do
         getSettingString
         setSetting
         echo -e "$SELECTED_SETTING_NAMESPACE" "$SETTING_STRING" "$(getSetting)"
-
     done
 done
