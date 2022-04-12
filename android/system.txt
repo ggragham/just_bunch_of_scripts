@@ -1,0 +1,5 @@
+show_password 0
+sound_effects_enabled 1
+system_locales en-US
+time_12_24 12
+vibrate_when_ringing 1

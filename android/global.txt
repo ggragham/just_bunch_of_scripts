@@ -1,0 +1,8 @@
+auto_time 1
+auto_time_zone 0
+bluetooth_on 0
+device_name Android
+enhanced_mac_randomization_force_enabled 1
+force_desktop_mode_on_external_displays 0
+hdmi_control_auto_device_off_enabled 0
+low_power_trigger_level 15
