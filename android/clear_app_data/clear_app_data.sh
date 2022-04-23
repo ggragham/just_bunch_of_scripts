@@ -19,6 +19,7 @@ for SELECTED_PKG in $FILE; do
     if [ "$SELECTED_PKG" = "net.typeblog.shelter" ]; then
         continue
     fi
+    
     killApp "$SELECTED_PKG"
     echo -e "$SELECTED_PKG killed"
     clearData "$SELECTED_PKG"
