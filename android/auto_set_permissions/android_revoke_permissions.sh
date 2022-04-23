@@ -21,14 +21,29 @@ SELECTED_GROUP=""
 SELECTED_PERMISSION=""
 SELECTED_PKG=""
 
+FILE_OWNER=""
+ERROR_LOG_FILE="./error_log.txt"
+
+is_sudo() {
+    if [ "$(id -u)" -eq 0 ]; then
+        FILE_OWNER="$SUDO_USER"
+    else
+        FILE_OWNER="$USER"
+    fi
+}
+
+chown "$FILE_OWNER" "$ERROR_LOG_FILE"
+
 revokePermissions() {
-    adb shell pm revoke --user "$SELECTED_UID" "$1" "$2" 2>> error_log.txt
+    adb shell pm revoke --user "$SELECTED_UID" "$1" "$2" 2>> "$ERROR_LOG_FILE"
     if [ "$?" -eq 0 ]; then
         echo -e "Permission $2 for $1 has been revoked"
     else 
         echo -e "Permission $2 for $1 ${RED}${BOLD}is not revoked${NORMAL}${NC}"
     fi
 }
+
+is_sudo
 
 for SELECTED_GROUP in "${GROUP_LIST[@]}"; do
     currentFile="$SELECTED_GROUP.txt"
