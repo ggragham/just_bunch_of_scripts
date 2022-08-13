@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+ipAddr="$(curl -s ident.me)"
+echo "$ipAddr"
+
