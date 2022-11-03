@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+# Generate nginx ssl certificate for local development.
+
+NAME="default"
+BITS=2048
+DAYS=7
+
+# Subject
+COUNTRYCODE="TS"
+COUNTRY="Test_C"
+LOCATION="Test_L"
+ORGANIZATION="Test_O"
+ORGANIZATION_UNIT="Test_OU"
+COMMON_NAME="TEST_CN"
+EMAIL="test@e.mail"
+
+# DH
+FAST_GEN="1"
+
+if [[ -f ".env" ]]; then
+	source .env
+fi
+
+SUBJECT="/C=${COUNTRYCODE}/ST=${COUNTRY}/L=${LOCATION}/O=${ORGANIZATION}/OU=${ORGANIZATION_UNIT}/CN=${COMMON_NAME}/emailAddress=${EMAIL}"
+echo "Gen SSL"
+openssl req -x509 -nodes -days "$DAYS" -newkey rsa:"$BITS" -subj "$SUBJECT" -keyout "${NAME}.key" -out "${NAME}.crt"
+
+echo ""
+echo "Gen DH"
+if [[ -z "$FAST_GEN" ]]; then
+	openssl dhparam -out "${NAME}.pem" "$BITS"
+else
+	openssl dhparam -dsaparam -out "${NAME}.pem" "$BITS"
+fi
