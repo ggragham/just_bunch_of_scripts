@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Generate nginx ssl certificate for local development.
+# Generate nginx SSL certificate for local development.
 
 # Subject
 COUNTRYCODE=${COUNTRYCODE:-"TS"}
@@ -10,6 +10,8 @@ ORGANIZATION=${ORGANIZATION:-"Test_O"}
 ORGANIZATION_UNIT=${ORGANIZATION_UNIT:-"Test_OU"}
 COMMON_NAME=${COMMON_NAME:-"TEST_CN"}
 EMAIL=${EMAIL:-"test@e.mail"}
+
+SUBJECT="/C=${COUNTRYCODE}/ST=${COUNTRY}/L=${LOCATION}/O=${ORGANIZATION}/OU=${ORGANIZATION_UNIT}/CN=${COMMON_NAME}/emailAddress=${EMAIL}"
 
 # OpenSSL
 NAME=${NAME:-"default"}
@@ -23,6 +25,7 @@ EXT_FILE=${EXT_FILE:-"domains.cnf"}
 FAST_GEN="1"
 
 genCertificateAuthority() {
+	echo "Gen CA"
 	openssl genrsa "-${KEY_CIPHER}" -out "ca_${NAME}.key" "$KEY_SIZE"
 	openssl req -new -x509 "-${HASH_ALGO}" -days "${LIFETIME}" -subj "$SUBJECT" -key "ca_${NAME}.key" -out "ca_${NAME}.crt"
 }
@@ -33,6 +36,7 @@ genSignedCretificate() {
 		exit 1
 	fi
 
+	echo "Gen Signed SSL"
 	openssl genrsa -out "cert_${NAME}.key" "$KEY_SIZE"
 	openssl req -new "-${HASH_ALGO}" -subj "$SUBJECT" -key "cert_${NAME}.key" -out "cert_${NAME}.csr"
 	openssl x509 -req "-${HASH_ALGO}" -days "$LIFETIME" -in "cert_${NAME}.csr" -CA "ca_${NAME}.crt" -CAkey "ca_${NAME}.key" -out "cert_${NAME}.crt" -extfile "$EXT_FILE" -CAcreateserial
@@ -44,8 +48,7 @@ genCertificate() {
 }
 
 genDiffieHellman() {
-	echo ""
-	echo "Gen DH"
+	echo -e "\nGen DH"
 	if [[ -z "$FAST_GEN" ]]; then
 		openssl dhparam -out "dh_${NAME}.pem" "$KEY_SIZE"
 	else
@@ -57,8 +60,6 @@ main() {
 	if [[ -f ".env" ]]; then
 		source gen_cert.env
 	fi
-
-	SUBJECT="/C=${COUNTRYCODE}/ST=${COUNTRY}/L=${LOCATION}/O=${ORGANIZATION}/OU=${ORGANIZATION_UNIT}/CN=${COMMON_NAME}/emailAddress=${EMAIL}"
 
 	case "$1" in
 	--ca)
