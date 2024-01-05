@@ -24,6 +24,29 @@ EXT_FILE=${EXT_FILE:-"domains.cnf"}
 # DH
 FAST_GEN="1"
 
+printHelp() {
+	echo "Usage: $0 [OPTION]"
+	echo "Generate nginx SSL certificate for local development."
+	echo ""
+	echo "Options:"
+	echo "--ca       Generate Certificate Authority"
+	echo "--cert     Generate Signed Certificate"
+	echo "           If 'ca_${NAME}.key' exists, generate signed certificate,"
+	echo "           otherwise generate self-signed certificate."
+	echo "           Also generates Diffie-Hellman parameters."
+	echo ""
+	echo "Environment variables (can be set in gen_cert.env file):"
+	echo "COUNTRYCODE, COUNTRY, LOCATION, ORGANIZATION, ORGANIZATION_UNIT, COMMON_NAME, EMAIL"
+	echo "NAME, KEY_SIZE, LIFETIME, KEY_CIPHER, HASH_ALGO, EXT_FILE, FAST_GEN"
+	echo ""
+	echo "The file specified by the EXT_FILE environment variable (default 'domains.cnf') is used to specify additional configuration for the certificate."
+	echo "It should contain something like the following:"
+	echo "subjectAltName = @alt_names"
+	echo "[alt_names]"
+	echo "IP.1 = 192.168.0.2"
+	echo "DNS.1 = example.com"
+}
+
 genCertificateAuthority() {
 	echo "Gen CA"
 	openssl genrsa "-${KEY_CIPHER}" -out "ca_${NAME}.key" "$KEY_SIZE"
@@ -73,8 +96,13 @@ main() {
 		fi
 		genDiffieHellman
 		;;
+	-h | --help)
+		printHelp
+		exit 0
+		;;
 	*)
 		echo "Error: Invalid argument"
+		printHelp
 		exit 1
 		;;
 	esac
