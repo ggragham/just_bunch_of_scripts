@@ -2,10 +2,6 @@
 
 # Generate nginx ssl certificate for local development.
 
-NAME="default"
-BITS=2048
-DAYS=7
-
 # Subject
 COUNTRYCODE=${COUNTRYCODE:-"TS"}
 COUNTRY=${COUNTRY:-"Test_C"}
@@ -15,21 +11,56 @@ ORGANIZATION_UNIT=${ORGANIZATION_UNIT:-"Test_OU"}
 COMMON_NAME=${COMMON_NAME:-"TEST_CN"}
 EMAIL=${EMAIL:-"test@e.mail"}
 
+# OpenSSL
+NAME=${NAME:-"default"}
+KEY_SIZE=${KEY_SIZE:-"2048"}
+LIFETIME=${LIFETIME:-"90"}
+KEY_CIPHER=${KEY_CIPHER:-"aes256"}
+HASH_ALGO=${HASH_ALGO:-"sha256"}
+EXT_FILE=${EXT_FILE:-"domains.cnf"}
+
 # DH
 FAST_GEN="1"
 
-if [[ -f ".env" ]]; then
-	source .env
-fi
+genCertificateAuthority() {
+	openssl genrsa "-${KEY_CIPHER}" -out "ca_${NAME}.key" "$KEY_SIZE"
+	openssl req -new -x509 "-${HASH_ALGO}" -days "${LIFETIME}" -subj "$SUBJECT" -key "ca_${NAME}.key" -out "ca_${NAME}.crt"
+}
 
-SUBJECT="/C=${COUNTRYCODE}/ST=${COUNTRY}/L=${LOCATION}/O=${ORGANIZATION}/OU=${ORGANIZATION_UNIT}/CN=${COMMON_NAME}/emailAddress=${EMAIL}"
-echo "Gen SSL"
-openssl req -x509 -nodes -days "$DAYS" -newkey rsa:"$BITS" -subj "$SUBJECT" -keyout "${NAME}.key" -out "${NAME}.crt"
+genCertificate() {
+	echo "Gen SSL"
+	openssl req -x509 -nodes -days "$DAYS" -newkey rsa:"$KEY_SIZE" -subj "$SUBJECT" -keyout "${NAME}.key" -out "${NAME}.crt"
+}
 
-echo ""
-echo "Gen DH"
-if [[ -z "$FAST_GEN" ]]; then
-	openssl dhparam -out "${NAME}.pem" "$BITS"
-else
-	openssl dhparam -dsaparam -out "${NAME}.pem" "$BITS"
-fi
+genDiffieHellman() {
+	echo ""
+	echo "Gen DH"
+	if [[ -z "$FAST_GEN" ]]; then
+		openssl dhparam -out "dh_${NAME}.pem" "$KEY_SIZE"
+	else
+		openssl dhparam -dsaparam -out "dh_${NAME}.pem" "$KEY_SIZE"
+	fi
+}
+
+main() {
+	if [[ -f ".env" ]]; then
+		source gen_cert.env
+	fi
+
+	SUBJECT="/C=${COUNTRYCODE}/ST=${COUNTRY}/L=${LOCATION}/O=${ORGANIZATION}/OU=${ORGANIZATION_UNIT}/CN=${COMMON_NAME}/emailAddress=${EMAIL}"
+
+	case "$1" in
+	--ca)
+		genCertificateAuthority
+		;;
+	--cert)
+		genCertificate
+		genDiffieHellman
+	*)
+		echo "Error: Invalid argument"
+		exit 1
+		;;
+	esac
+}
+
+main "$@"
