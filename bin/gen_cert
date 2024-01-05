@@ -27,6 +27,17 @@ genCertificateAuthority() {
 	openssl req -new -x509 "-${HASH_ALGO}" -days "${LIFETIME}" -subj "$SUBJECT" -key "ca_${NAME}.key" -out "ca_${NAME}.crt"
 }
 
+genSignedCretificate() {
+	if [ ! -f "$EXT_FILE" ]; then
+		echo "File 'domains.cnf' does not exist."
+		exit 1
+	fi
+
+	openssl genrsa -out "cert_${NAME}.key" "$KEY_SIZE"
+	openssl req -new "-${HASH_ALGO}" -subj "$SUBJECT" -key "cert_${NAME}.key" -out "cert_${NAME}.csr"
+	openssl x509 -req "-${HASH_ALGO}" -days "$LIFETIME" -in "cert_${NAME}.csr" -CA "ca_${NAME}.crt" -CAkey "ca_${NAME}.pem" -out "cert_${NAME}.crt" -extfile "$EXT_FILE" -CAcreateserial
+}
+
 genCertificate() {
 	echo "Gen SSL"
 	openssl req -x509 -nodes -days "$DAYS" -newkey rsa:"$KEY_SIZE" -subj "$SUBJECT" -keyout "${NAME}.key" -out "${NAME}.crt"
@@ -54,8 +65,13 @@ main() {
 		genCertificateAuthority
 		;;
 	--cert)
-		genCertificate
+		if [[ -f "ca_${NAME}.pem" ]]; then
+			genSignedCretificate
+		else
+			genCertificate
+		fi
 		genDiffieHellman
+		;;
 	*)
 		echo "Error: Invalid argument"
 		exit 1
