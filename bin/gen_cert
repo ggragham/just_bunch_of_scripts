@@ -35,7 +35,7 @@ genSignedCretificate() {
 
 	openssl genrsa -out "cert_${NAME}.key" "$KEY_SIZE"
 	openssl req -new "-${HASH_ALGO}" -subj "$SUBJECT" -key "cert_${NAME}.key" -out "cert_${NAME}.csr"
-	openssl x509 -req "-${HASH_ALGO}" -days "$LIFETIME" -in "cert_${NAME}.csr" -CA "ca_${NAME}.crt" -CAkey "ca_${NAME}.pem" -out "cert_${NAME}.crt" -extfile "$EXT_FILE" -CAcreateserial
+	openssl x509 -req "-${HASH_ALGO}" -days "$LIFETIME" -in "cert_${NAME}.csr" -CA "ca_${NAME}.crt" -CAkey "ca_${NAME}.key" -out "cert_${NAME}.crt" -extfile "$EXT_FILE" -CAcreateserial
 }
 
 genCertificate() {
@@ -65,7 +65,7 @@ main() {
 		genCertificateAuthority
 		;;
 	--cert)
-		if [[ -f "ca_${NAME}.pem" ]]; then
+		if [[ -f "ca_${NAME}.key" ]]; then
 			genSignedCretificate
 		else
 			genCertificate
