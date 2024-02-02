@@ -71,7 +71,7 @@ genCertificate() {
 
 genDiffieHellman() {
 	echo -e "\nGen DH"
-	if [[ -z "$FAST_GEN" ]]; then
+	if [[ "$FAST_GEN" == false ]]; then
 		openssl dhparam -out "dh_${NAME}.pem" "$KEY_SIZE"
 	else
 		openssl dhparam -dsaparam -out "dh_${NAME}.pem" "$KEY_SIZE"
