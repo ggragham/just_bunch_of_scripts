@@ -11,7 +11,6 @@ ORGANIZATION_UNIT=${ORGANIZATION_UNIT:-"Test_OU"}
 COMMON_NAME=${COMMON_NAME:-"TEST_CN"}
 EMAIL=${EMAIL:-"test@e.mail"}
 
-SUBJECT="/C=${COUNTRYCODE}/ST=${COUNTRY}/L=${LOCATION}/O=${ORGANIZATION}/OU=${ORGANIZATION_UNIT}/CN=${COMMON_NAME}/emailAddress=${EMAIL}"
 
 # OpenSSL
 NAME=${NAME:-"default"}
@@ -83,6 +82,8 @@ main() {
 	if [[ -f ".env" ]]; then
 		source .env
 	fi
+	
+	SUBJECT="/C=${COUNTRYCODE}/ST=${COUNTRY}/L=${LOCATION}/O=${ORGANIZATION}/OU=${ORGANIZATION_UNIT}/CN=${COMMON_NAME}/emailAddress=${EMAIL}"
 
 	case "$1" in
 	--ca)
