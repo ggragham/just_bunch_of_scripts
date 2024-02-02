@@ -81,7 +81,7 @@ genDiffieHellman() {
 
 main() {
 	if [[ -f ".env" ]]; then
-		source gen_cert.env
+		source .env
 	fi
 
 	case "$1" in
